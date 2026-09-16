@@ -128,7 +128,7 @@ export interface SignatureOut {
 
 export interface VerificationResult {
   verdict: Verdict;
-  envelope: "raw" | "pdf" | "cms" | "jws";
+  envelope: "raw" | "pdf" | "cms" | "jws" | "image";
   signature: SignatureOut | null;
   signer: CertInfo | null;
   chain: ChainOut | null;
@@ -139,6 +139,9 @@ export interface VerificationResult {
   findings: Finding[];
   payload_sha256: string | null;
   summary: string;
+  trusted_record_status?: string;
+  cryptographic_verification?: string;
+  overall_result?: string;
 }
 
 export interface TrustAnchor {

@@ -140,6 +140,9 @@ class VerificationResult:
     findings: list[CryptoFinding] = field(default_factory=list)
     payload_sha256: str | None = None
     summary: str = ""
+    trusted_record_status: str = "NOT_CHECKED"
+    cryptographic_verification: str = "NOT_AVAILABLE"
+    overall_result: str = "INDETERMINATE"
 
     def add(self, finding: CryptoFinding) -> None:
         self.findings.append(finding)
@@ -158,6 +161,9 @@ class VerificationResult:
             "findings": [f.as_dict() for f in self.findings],
             "payload_sha256": self.payload_sha256,
             "summary": self.summary,
+            "trusted_record_status": self.trusted_record_status,
+            "cryptographic_verification": self.cryptographic_verification,
+            "overall_result": self.overall_result,
         }
 
 

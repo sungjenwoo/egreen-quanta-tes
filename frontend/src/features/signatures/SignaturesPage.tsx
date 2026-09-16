@@ -151,7 +151,7 @@ function DocumentVerifyPanel() {
   return (
     <div className="space-y-4">
       <Card className="space-y-3">
-        <Field label="Signed file (PDF / .p7s / .jws)" htmlFor="dv-file">
+        <Field label="Artifact (signed document, certificate image, or scan)" htmlFor="dv-file">
           <Input
             id="dv-file"
             type="file"

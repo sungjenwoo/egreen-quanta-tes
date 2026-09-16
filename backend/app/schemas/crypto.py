@@ -105,6 +105,9 @@ class VerificationOut(BaseModel):
     findings: list[FindingOut]
     payload_sha256: str | None
     summary: str
+    trusted_record_status: str = "NOT_CHECKED"
+    cryptographic_verification: str = "NOT_AVAILABLE"
+    overall_result: str = "INDETERMINATE"
     # populated by the detection engine (Module 3)
     risk_score: float = 0.0
     event_id: str | None = None

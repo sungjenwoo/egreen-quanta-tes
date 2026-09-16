@@ -61,6 +61,16 @@ export function VerificationResultCard({ result }: { result: VerificationResult 
               <span className="text-[11px] uppercase tracking-wide text-muted">{result.envelope}</span>
             </div>
             <p className="text-sm text-fg">{result.summary}</p>
+            {result.envelope === "image" && (
+              <dl className="mt-3 grid max-w-xl grid-cols-[12rem_1fr] gap-y-1 text-xs">
+                <Row k="Trusted Record" v={result.trusted_record_status ?? "NOT_CHECKED"} />
+                <Row
+                  k="Cryptographic Verification"
+                  v={result.cryptographic_verification ?? "INSUFFICIENT / NOT AVAILABLE"}
+                />
+                <Row k="Overall" v={result.overall_result ?? "INDETERMINATE"} />
+              </dl>
+            )}
           </div>
         </div>
       </Card>

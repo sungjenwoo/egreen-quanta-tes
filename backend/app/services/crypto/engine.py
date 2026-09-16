@@ -331,6 +331,8 @@ async def verify_document(
         return await _verify_pdf(session, content, at_time)
     if lower.endswith((".jws", ".jwt")) or (content[:2] == b"ey" and content.count(b".") == 2):
         return _verify_jws(content)
+    if _looks_like_image(content, lower):
+        return _verify_image(content)
 
     # Everything else is treated as CMS/PKCS#7 — but only if it actually looks
     # like one, so an unrelated upload gets a helpful error instead of a raw
@@ -347,6 +349,51 @@ async def verify_document(
         "Unrecognised file. Upload a signed PDF (starts with %PDF-), a CMS/PKCS#7 "
         "signature (.p7s / .p7m, DER or PEM), or a compact JWS token. This file "
         "matches none of those."
+    )
+
+
+def _looks_like_image(content: bytes, filename: str) -> bool:
+    """Identify common image containers without trusting the filename alone."""
+    signatures = (
+        content.startswith(b"\xff\xd8\xff"),
+        content.startswith(b"\x89PNG\r\n\x1a\n"),
+        content.startswith((b"GIF87a", b"GIF89a")),
+        content.startswith(b"BM"),
+        content.startswith(b"RIFF") and content[8:12] == b"WEBP",
+        content.startswith(b"II*\x00") or content.startswith(b"MM\x00*"),
+    )
+    extension_hint = filename.endswith(
+        (".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tif", ".tiff")
+    )
+    return any(signatures) or (extension_hint and bool(content))
+
+
+def _verify_image(content: bytes) -> VerificationResult:
+    """Return an honest result for a photograph/scan.
+
+    OCR or visual metadata is evidence only; an image has no signed envelope that
+    this cryptographic engine can validate. This deliberately cannot return VALID.
+    """
+    digest = hashlib.sha256(content).hexdigest()
+    return VerificationResult(
+        verdict=Verdict.INDETERMINATE,
+        envelope="image",
+        signature=None,
+        signer=None,
+        chain=None,
+        revocation=None,
+        signing_time=None,
+        tsa_present=False,
+        tsa_trusted=False,
+        payload_sha256=digest,
+        summary=(
+            "Image/scan received. Cryptographic verification is INSUFFICIENT / "
+            "NOT AVAILABLE. Extracted certificate fields may be compared with an "
+            "Admin trusted record, but that correspondence is not cryptographic proof."
+        ),
+        trusted_record_status="NOT_CHECKED",
+        cryptographic_verification="INSUFFICIENT / NOT AVAILABLE",
+        overall_result="INDETERMINATE",
     )
 
 

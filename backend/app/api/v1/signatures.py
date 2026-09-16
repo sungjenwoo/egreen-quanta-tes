@@ -63,7 +63,10 @@ async def verify_document(
     request: Request,
     session: SessionDep,
     user: CurrentUser,
-    file: Annotated[UploadFile, File(description="Signed PDF, CMS/PKCS#7, or compact JWS")],
+    file: Annotated[
+        UploadFile,
+        File(description="Signed document, certificate artifact, photograph, or scan"),
+    ],
     detached_content: Annotated[
         UploadFile | None, File(description="Original content for a detached CMS signature")
     ] = None,

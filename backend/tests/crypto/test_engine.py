@@ -151,6 +151,20 @@ async def test_verify_document_rejects_non_signature_file(db_session) -> None:
         )
 
 
+async def test_image_upload_is_not_reported_as_cryptographically_valid(db_session) -> None:
+    """A certificate photograph/scan cannot become cryptographic proof by matching fields."""
+    result = await engine.verify_document(
+        db_session,
+        filename="certificate-photo.jpg",
+        content=b"\xff\xd8\xff\xe0fake-photo-bytes",
+    )
+    assert result.envelope == "image"
+    assert result.verdict.value == "indeterminate"
+    assert result.cryptographic_verification == "INSUFFICIENT / NOT AVAILABLE"
+    assert result.overall_result == "INDETERMINATE"
+    assert "not cryptographic proof" in result.summary
+
+
 async def test_verify_document_routes_compact_jws(db_session, demo_pki) -> None:
     """A raw compact JWS (no .jws extension) is still recognised by shape."""
     import jwt as _jwt
